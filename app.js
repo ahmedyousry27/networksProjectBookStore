@@ -10,6 +10,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 var username_forgettten_pasword;
 flag =false;
+var verification_code;
+var verificationAttemp
 const NAME_TO_ROUTE = {
   "leaves of grass": "leaves",
   "the grapes of wrath": "grapes",
@@ -247,6 +249,14 @@ else
 res.render('home',{username:req.session.userid}
 
 )})
+//route to code_verification
+app.get('/code_verification',function(req,res)
+{
+
+  res.render("code_verification")
+});
+
+
 //route to email
 app.get('/enter_mail',function(req,res)
 {
@@ -338,6 +348,7 @@ app.post('/enter_mail', async function(req,res){
   console.log(check);
   username_forgettten_pasword=check.username;
   var code = Math.floor(Math.random()*90000) + 10000;
+  verification_code=code;
   if (check)
   {
     
@@ -365,7 +376,7 @@ const mailDetails = {
   subject: 'Change password',
 
  
-  html:' <p> Dear '+check.username+','+'<p> your old password '+check.password
+  html:' <p> Hey '+check.username+',<br>'+'<p> Change Password requires further verification <br> your Verification code:'+code+'<p> <br> <br> Thanks, <br> Ahmed_yousryBookStore'
 
 };
 
@@ -377,11 +388,14 @@ mailTransporter.sendMail(mailDetails, function(err, data) {
      res.send('Error Occurs');
 
   } else {
-      res.redirect('forget_password');
+    alert("Check your mail an email sent to you with a verification ");
+      res.redirect('/code_verification');
       res.send('Email sent successfully');
+
 
   }
 }
+
 
 );
   }
@@ -425,5 +439,28 @@ app.post('/forget_password', async function(req,res)
 app.listen(PORT, () => {
   console.log("Server is running on port 8080 ");
 });
-//aa
 
+
+app.post('/code_verification', async function (req, res) {
+
+  var x = req.body.verification_code;
+  if (verification_code=x)
+  {
+    verificationAttemp=0;
+    res.redirect('forget_password');
+  }
+  else
+  {
+    verificationAttemp=verificationAttemp+1;
+    if (verificationAttemp==3)
+    {
+      verificationAttemp=0;
+      redirect('login');
+    }
+    else
+    {
+    alert('Wrong verification number');
+    res.render('/code_verification');
+    }
+  }
+});
