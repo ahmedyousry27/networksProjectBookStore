@@ -11,7 +11,7 @@ app.use(express.static('public'));
 var username_forgettten_pasword;
 flag =false;
 var verification_code;
-var verificationAttemp
+var verificationAttemp=0 ;
 const NAME_TO_ROUTE = {
   "leaves of grass": "leaves",
   "the grapes of wrath": "grapes",
@@ -442,25 +442,28 @@ app.listen(PORT, () => {
 
 
 app.post('/code_verification', async function (req, res) {
-
-  var x = req.body.verification_code;
-  if (verification_code=x)
+console.log(verification_code);
+  var x = req.body.verficationCode;
+  
+  if (x==verification_code)
   {
     verificationAttemp=0;
-    res.redirect('forget_password');
+    res.redirect('/forget_password');
   }
   else
   {
-    verificationAttemp=verificationAttemp+1;
+    verificationAttemp=verificationAttemp+1; 
     if (verificationAttemp==3)
     {
       verificationAttemp=0;
-      redirect('login');
+      res.redirect('/login');
     }
     else
     {
+    
+      console.log(verificationAttemp);
     alert('Wrong verification number');
-    res.render('/code_verification');
+    res.render('code_verification');
     }
   }
 });
