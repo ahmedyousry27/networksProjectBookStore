@@ -3,6 +3,7 @@ const bodyParser =require( "body-parser");
 const alert = require('alert');
 var session=require('express-session')
 const app = express();
+const bcrypt= require('bcrypt');
 const PORT = process.env.PORT || 8080;
 const nodemailer = require('nodemailer');
 app.use(bodyParser.json());
@@ -99,6 +100,8 @@ app.post("/register",async function (req, res) {
   var x = req.body.username;
   var y = req.body.password;
   var z = req.body.email;
+  const salt = await bcrypt.genSalt();
+  y=await bcrypt.hash(y,salt);
   if (y === null || x === null) {
     alert('please enter your full data')
   }
