@@ -53,10 +53,21 @@ app.post('/login', async function (req, res) {
   var y = req.body.password;
 
   if (x&&y) {
-    var sth= await client.db('firstdb').collection('firstcollection').findOne({username:x,password:y});
-    if (sth==null) { res.render('login', { errormsg: "Wrong username or password" }); 
-  alert("Wrong username or password")} 
-    else { session = req.session; session.userid = req.body.username; flag=true; res.redirect('/home'); }
+    var user= await client.db('firstdb').collection('firstcollection').findOne({username:x});
+    if (user)
+    {
+      const password = await bcrypt.compare(y,user.password);
+      if (password)
+      {
+        session = req.session; session.userid = req.body.username; flag=true; res.redirect('/home'); 
+      }
+      else
+      {
+        res.render('login', { errormsg: "Wrong username or password" }); 
+        alert("Wrong username or password")
+      }
+
+    }
   } 
   else { res.render('login', { errormsg: "Must enter username and password" }); }
 });
