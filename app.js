@@ -63,10 +63,17 @@ app.post('/login', async function (req, res) {
       }
       else
       {
+        alert("Wrong username or password");
         res.render('login', { errormsg: "Wrong username or password" }); 
-        alert("Wrong username or password")
+  
       }
 
+    }
+    else 
+    {
+
+      res.render('login', { errormsg: "Wrong username or password" }); 
+      alert("Wrong username or password");
     }
   } 
   else { res.render('login', { errormsg: "Must enter username and password" }); }
@@ -138,15 +145,15 @@ app.post("/register",async function (req, res) {
 
 //route for poetry page
 app.get("/poetry", function (req, res) {
-  if (!flag)
+  if (req.session.user == null)
   {
-    
-    res.redirect("login");
-    alert('Login first');
-    
+    alert("Please login first");
+    res.redirect('/login');
   }
   else
-  res.render("poetry", {errormsg: ''});
+  {
+    res.render('poetry');
+  }
 });
 
 //route for sun page
@@ -421,32 +428,37 @@ mailTransporter.sendMail(mailDetails, function(err, data) {
 });
 app.post('/forget_password', async function(req,res)
 {
-  var old_password = req.body.oldPassword;
   var new_password = req.newPassword;
   var confirm_password = req.body.confirmPassword;
-  var check =await client.db('firstdb').collection('firstcollection').findOne({username:username_forgettten_pasword});
+  var user =await client.db('firstdb').collection('firstcollection').findOne({username:username_forgettten_pasword});
+  const password = await bcrypt.compare(new_password,user.password);
+
   console.log(check);
   console.log(check.password);
-  console.log(old_password);
-  if (check.password=old_password)
+  
+  if (new_password=confirm_password)
   {
-    if (new_password=confirm_password)
-    {
-      client.db('firstdb').collection('firstcollection').updateOne( {username:username_forgettten_pasword}, {$set:{password: new_password}});
-      res.redirect('login');
-    }
-    else 
-    {
-      res.redirect('forget_password');
-      alert('The new password is not identical to the confirmed password');
-
-    }
+        if (password)
+        {
+          alert("please enter a new password");
+          res.render('forget_password');
+        }
+        else 
+        {
+          const salt = await bcrypt.genSalt();
+          const newEncryptedPassword=await bcrypt.hash(new_password,salt);
+          client.db('firstdb').collection('firstcollection').updateOne( {username:username_forgettten_pasword}, {$set:{password: newEncryptedPassword}});
+          res.redirect('/login');
+        }
   }
   else 
   {
-    res.redirect('forget_password');
-    alert('Wrong old password');
+    alert('The new password is not identical to the confirmed password');
+    res.render('forget_password');
+
   }
+
+
   
 });
 
