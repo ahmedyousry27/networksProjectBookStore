@@ -145,7 +145,7 @@ app.post("/register",async function (req, res) {
 
 //route for poetry page
 app.get("/poetry", function (req, res) {
-  if (req.session.user == null)
+  if (req.session.userid == null)
   {
     alert("Please login first");
     res.redirect('/login');
@@ -158,43 +158,52 @@ app.get("/poetry", function (req, res) {
 
 //route for sun page
 app.get("/sun", function (req, res) {
-  if (!flag)
+  if (req.session.userid == null)
   {
-    
-    res.redirect("login");
-    alert('Login first');
+    alert('Please Login first'); 
+    res.redirect("/login");
+   
     
   }
+  else
+  {
   res.render("sun", {errormsg: ''});
+  }
 });
 
 //route for leaves page
 app.get("/leaves", function (req, res) {
-  if (!flag)
+  if (req.session.userid == null)
   {
     
     res.redirect("login");
-    alert('Login first');
+    alert('Please Login first');
     
   }
+  else
+  {
   res.render("leaves", {errormsg: ''});
+  }
 });
 
 //route for novel page
 app.get("/novel", function (req, res) {
-  if (!flag)
+  if (req.session.userid == null)
   {
     
     res.redirect("login");
     alert('Login first');
     
   }
+  else
+  {
   res.render("novel", {errormsg: ''});
+  }
 });
 
 //route for grapes page
 app.get("/grapes", function (req, res) {
-  if (!flag)
+  if (req.session.userid == null)
   {
     
     res.redirect("login");
@@ -207,7 +216,7 @@ app.get("/grapes", function (req, res) {
 
 //route for flies page
 app.get("/flies", function (req, res) {
-  if (!flag)
+  if (req.session.userid == null)
   {
     
     res.redirect("login");
@@ -220,7 +229,7 @@ app.get("/flies", function (req, res) {
 
 //route for fiction page
 app.get("/fiction", function (req, res) {
-  if (!flag)
+  if (req.session.userid == null)
   {
     
     res.redirect("login");
@@ -233,7 +242,7 @@ app.get("/fiction", function (req, res) {
 
 //route for mockingbird page
 app.get("/mockingbird", function (req, res) {
-  if (!flag)
+  if (req.session.userid == null)
   {
     
     res.redirect("login");
@@ -246,7 +255,7 @@ app.get("/mockingbird", function (req, res) {
 
 //route for dune page
 app.get("/dune", function (req, res) {
-  if (!flag)
+  if (req.session.userid == null)
   {
     
     res.redirect("login");
@@ -259,7 +268,7 @@ app.get("/dune", function (req, res) {
 
 
 app.get('/home',function(req,res){
-  if (!flag)
+  if (req.session.userid == null)
   {
     
     res.redirect("login");
@@ -286,6 +295,7 @@ res.render("enter_mail")
 app.get('/readlist', async function(req, res, next) {
   const userInfo = await client.db('firstdb').collection('firstcollection').findOne({username:req.session.userid});
   const { books } = userInfo;
+  console.log(books);
   const booksWithRoutes = books.map((element) => {
     return {name: element, route: (NAME_TO_ROUTE[element])}
   });
@@ -428,17 +438,14 @@ mailTransporter.sendMail(mailDetails, function(err, data) {
 });
 app.post('/forget_password', async function(req,res)
 {
-  var new_password = req.newPassword;
+  var new_password = req.body.newPassword;
   var confirm_password = req.body.confirmPassword;
   var user =await client.db('firstdb').collection('firstcollection').findOne({username:username_forgettten_pasword});
-  const password = await bcrypt.compare(new_password,user.password);
-
-  console.log(check);
-  console.log(check.password);
+  const passwordd = await bcrypt.compare(new_password,user.password);
   
-  if (new_password=confirm_password)
+  if (new_password==confirm_password)
   {
-        if (password)
+        if (passwordd)
         {
           alert("please enter a new password");
           res.render('forget_password');
