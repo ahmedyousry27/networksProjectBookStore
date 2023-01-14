@@ -11,6 +11,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 var username_forgettten_pasword;
 flag =false;
+flagEnterEmail=false;
+flagEnterVerificationCode=false;
 var verification_code;
 var verificationAttemp=0 ;
 const NAME_TO_ROUTE = {
@@ -282,7 +284,12 @@ res.render('home',{username:req.session.userid}
 //route to code_verification
 app.get('/code_verification',function(req,res)
 {
-
+  if (flagEnterEmail==false )
+  {
+    res.redirect('/enter_mail');
+    alert("enter your mail first")
+  }
+  else
   res.render("code_verification")
 });
 
@@ -370,6 +377,12 @@ app.post('/leaves', async function(req,res){
 });
 app.get('/forget_password',function(req,res)
 {
+  if (flagEnterEmail==false || flagEnterVerificationCode==false)
+  {
+    res.redirect('/enter_mail');
+    alert("enter your mail first")
+  }
+  else
 res.render('forget_password');
 });
 
@@ -420,6 +433,7 @@ mailTransporter.sendMail(mailDetails, function(err, data) {
 
   } else {
     alert("Check your mail an email sent to you with a verification ");
+    flagEnterEmail=true;
       res.redirect('/code_verification');
       res.send('Email sent successfully');
 
@@ -455,6 +469,8 @@ app.post('/forget_password', async function(req,res)
           const salt = await bcrypt.genSalt();
           const newEncryptedPassword=await bcrypt.hash(new_password,salt);
           client.db('firstdb').collection('firstcollection').updateOne( {username:username_forgettten_pasword}, {$set:{password: newEncryptedPassword}});
+          flagEnterEmail=false;
+          flagEnterVerificationCode=false;
           res.redirect('/login');
         }
   }
@@ -481,6 +497,7 @@ console.log(verification_code);
   if (x==verification_code)
   {
     verificationAttemp=0;
+    flagEnterVerificationCode=true;
     res.redirect('/forget_password');
   }
   else
